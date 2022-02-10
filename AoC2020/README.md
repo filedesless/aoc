@@ -1,12 +1,12 @@
-# AoC2020
+# aoc2020
 
-My solution to the Advent of Code 2020, in ~~clojure~~ haskell
+My solution to the Advent of Code 2020, in clojure
 
 ## Run
 
-    stack run
+    lein run
 
 ## Test
 
-    stack test
+    lein test
 
