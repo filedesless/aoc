@@ -13,28 +13,33 @@ def point(s: str) -> Tuple[int, int]:
 
 
 # build the grid
-grid = set()
+grid = dict()
 for line in lines:
     points = line.split(' -> ')
     for k in range(len(points) - 1):
         l, r = sorted([point(points[k]), point(points[k+1])])
         for i in range(l[0], r[0]+1):
             for j in range(l[1], r[1]+1):
-                grid.add((i, j))
+                grid[(i, j)] = '#'
 
 lowest = max(y for (_, y) in grid)
-n = len(grid)
-a = False
 
-# simulate sand falling
+# mark impossible to reach places
+for y in range(lowest + 1):
+    for x in range(498 - lowest, 503 + lowest):
+        if (x - 1, y) in grid and (x, y) in grid and (x + 1, y) in grid:
+            grid[(x, y + 1)] = '$'
+
+# compute the area of the sand for p2
+b = (lowest + 2)**2 - len(grid)
+
+# simulate sand falling for p1
+n = len(grid)
 x, y = 500, 0
 while (500, 0) not in grid:
     if y == lowest + 1:
-        if not a:
-            print('Part a:', len(grid) - n)
-            a = True
-        grid.add((x, y))
-        x, y = 500, 0
+        print('Part a:', len(grid) - n)
+        break
     elif (x, y + 1) not in grid:
         y += 1
     elif (x - 1, y + 1) not in grid:
@@ -44,7 +49,7 @@ while (500, 0) not in grid:
         x += 1
         y += 1
     else:
-        grid.add((x, y))
+        grid[(x, y)] = 'o'
         x, y = 500, 0
 
-print('Part b:', len(grid) - n)
+print('Part b:', b)
