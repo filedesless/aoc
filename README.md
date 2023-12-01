@@ -21,3 +21,11 @@ First few days in clojure
 ## 2021
 
 Most days in rust
+
+## 2022
+
+Half in python
+
+## 2023
+
+One lang a day
