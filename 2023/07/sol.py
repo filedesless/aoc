@@ -1,5 +1,8 @@
 from enum import IntEnum, auto
 from collections import Counter
+from itertools import product
+
+CARDS = "AKQT98765432J"
 
 
 class Card:
@@ -15,8 +18,7 @@ class Card:
         return hash(self.value)
 
     def __lt__(self, other):
-        l = "AKQJT98765432"
-        return l.index(self.value) > l.index(other.value)
+        return CARDS.index(self.value) > CARDS.index(other.value)
 
     def __repr__(self) -> str:
         return self.value
@@ -36,9 +38,12 @@ class Hand:
     cards: (Card, Card, Card, Card, Card)
     bid: int
 
-    def __init__(self, cards: str, bid: int) -> None:
-        self.cards = tuple(Card(card) for card in cards)
+    def __init__(self, cards: (Card, Card, Card, Card, Card), bid: int) -> None:
+        self.cards = cards
         self.bid = bid
+
+    def __eq__(self, other) -> bool:
+        return self.cards == other.cards
 
     def __lt__(self, other):
         a, b = self.type(), other.type()
@@ -47,28 +52,38 @@ class Hand:
         return a < b
 
     def type(self) -> HandType:
-        c = Counter(self.cards)
-        if 5 in c.values():
-            return HandType.FIVE
-        elif 4 in c.values():
-            return HandType.FOUR
-        elif 3 in c.values():
-            if len(c) == 2:
-                return HandType.FULL
-            return HandType.THREE
-        elif 2 in c.values():
-            cc = Counter(c.values())
-            if cc[2] == 2:
-                return HandType.TWO
-            return HandType.ONE
-        return HandType.HIGH
+        possibilities = tuple(card.value if card.value !=
+                              'J' else CARDS for card in self.cards)
+        return max(hand_type(hand) for hand in product(*possibilities))
 
     def __repr__(self) -> str:
         return "".join([str(card) for card in self.cards]) + " " + str(self.bid)
 
 
+def hand_type(cards: str) -> HandType:
+    c = Counter(cards)
+    if 5 in c.values():
+        return HandType.FIVE
+    elif 4 in c.values():
+        return HandType.FOUR
+    elif 3 in c.values():
+        if len(c) == 2:
+            return HandType.FULL
+        return HandType.THREE
+    elif 2 in c.values():
+        cc = Counter(c.values())
+        if cc[2] == 2:
+            return HandType.TWO
+        return HandType.ONE
+    return HandType.HIGH
+
+
+def get_hand(s: str) -> Hand:
+    cards, bid = s.split()
+    return Hand(tuple(Card(c) for c in cards), int(bid))
+
+
 lines = [line.strip() for line in open("input", encoding="utf8").readlines()]
-hands = [Hand(line.split()[0], int(line.split()[1])) for line in lines]
-hands.sort()
+hands = list(map(get_hand, lines))
 
 print(sum(hand.bid * (i + 1) for (i, hand) in enumerate(sorted(hands))))
